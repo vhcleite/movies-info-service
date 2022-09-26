@@ -40,7 +40,7 @@ class MovieInfoControllerTest {
                 .blockLast();
     }
 
-    private final static String BASE_URL = "/v1/movieinfos";
+    private final static String MOVIES_INFO_URL = "/v1/movieinfos";
 
     @AfterEach
     void tearDown() {
@@ -54,7 +54,7 @@ class MovieInfoControllerTest {
                 2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
 
         webTestClient.post()
-                .uri(BASE_URL)
+                .uri(MOVIES_INFO_URL)
                 .bodyValue(movieInfo)
                 .exchange()
                 .expectStatus()
@@ -71,7 +71,7 @@ class MovieInfoControllerTest {
     void findAll() {
         webTestClient
                 .get()
-                .uri(BASE_URL)
+                .uri(MOVIES_INFO_URL)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -83,7 +83,7 @@ class MovieInfoControllerTest {
     void findById() {
         webTestClient
                 .get()
-                .uri(BASE_URL + "/abc")
+                .uri(MOVIES_INFO_URL + "/abc")
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -97,13 +97,23 @@ class MovieInfoControllerTest {
     }
 
     @Test
+    void findById_notFound() {
+        webTestClient
+                .get()
+                .uri(MOVIES_INFO_URL + "/cde")
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
     void putMovieInfoService() {
         String title = "teste put endpoint";
         var movieInfo = new MovieInfo("abc", title,
                 2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
 
         webTestClient.put()
-                .uri(BASE_URL + "/abc")
+                .uri(MOVIES_INFO_URL + "/abc")
                 .bodyValue(movieInfo)
                 .exchange()
                 .expectStatus()
@@ -118,10 +128,25 @@ class MovieInfoControllerTest {
     }
 
     @Test
+    void putMovieInfoService_notFound() {
+        var id = "edf";
+        String title = "teste put endpoint";
+        var movieInfo = new MovieInfo(id, title,
+                2005, List.of("Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
+        webTestClient
+                .put()
+                .uri(MOVIES_INFO_URL + "/{id}", id)
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
     void deleteById() {
         webTestClient
                 .delete()
-                .uri(BASE_URL + "/abc")
+                .uri(MOVIES_INFO_URL + "/abc")
                 .exchange()
                 .expectStatus()
                 .isNoContent();
