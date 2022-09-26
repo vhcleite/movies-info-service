@@ -97,6 +97,27 @@ class MovieInfoControllerUnitTest {
     }
 
     @Test
+    void postMovieInfoService_validation() {
+
+        var movieInfo = new MovieInfo(null, "",
+                -2005, List.of(""), LocalDate.parse("2005-06-15"));
+        client
+                .post()
+                .uri(MOVIES_INFO_URL)
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(result -> {
+                    var error = result.getResponseBody();
+                    assert error != null;
+                    String expectedErrorMessage = "movieInfo.cast must be present,movieInfo.name must be present,movieInfo.year must be a Positive Value";
+                    assertEquals(expectedErrorMessage, error);
+                });
+    }
+
+    @Test
     void putMovieInfoService() {
         var id = "abc";
         var updatedMovieInfo = new MovieInfo("abc", "Dark Knight Rises 1",
