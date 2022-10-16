@@ -2,6 +2,7 @@ package com.reactivespring.moviesinfoservice.controller;
 
 import com.reactivespring.moviesinfoservice.domain.MovieInfo;
 import com.reactivespring.moviesinfoservice.service.MovieInfoService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -14,6 +15,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping("/v1")
+@Slf4j
 public class MovieInfoController {
 
     private final MovieInfoService movieInfoService;
@@ -29,8 +31,12 @@ public class MovieInfoController {
     }
 
     @GetMapping("/movieinfos")
-    public Flux<MovieInfo> findAll() {
-        return movieInfoService.findAll().log();
+    public Flux<MovieInfo> findAll(@RequestParam(value = "year", required = false) Integer year) {
+        log.info("year : {} ", year);
+        if (year != null) {
+            return movieInfoService.findByYear(year).log();
+        }
+        return movieInfoService.findAll();
     }
 
     @GetMapping("/movieinfos/{id}")

@@ -1,6 +1,7 @@
 package com.reactivespring.moviesinfoservice.repository;
 
 import com.reactivespring.moviesinfoservice.domain.MovieInfo;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,11 @@ class MovieInfoRepositoryTest {
         movieInfoRepository.saveAll(moviesInfo).blockLast();
     }
 
+    @AfterEach
+    void tearDown() {
+        movieInfoRepository.deleteAll().block();
+    }
+
     @Test
     void findAll() {
         var moviesInfo = movieInfoRepository.findAll().log();
@@ -41,9 +47,7 @@ class MovieInfoRepositoryTest {
     void findById() {
         var movieInfo = movieInfoRepository.findById("b");
         StepVerifier.create(movieInfo)
-                .assertNext(info -> {
-                    assertEquals("The Dark Knight", info.getName());
-                });
+                .assertNext(info -> assertEquals("The Dark Knight", info.getName()));
     }
 
     @Test
@@ -51,8 +55,24 @@ class MovieInfoRepositoryTest {
         var movieInfo = movieInfoRepository.save(new MovieInfo("b", "The Dark Knight1",
                 2008, List.of("Christian Bale", "HeathLedger"), LocalDate.parse("2008-06-15"))).log();
         StepVerifier.create(movieInfo)
-                .assertNext(info -> {
-                    assertEquals("The Dark Knight1", info.getName());
-                });
+                .assertNext(info -> assertEquals("The Dark Knight1", info.getName()));
+    }
+
+    @Test
+    void findMovieInfoByYear() {
+        var movieInfosFlux = movieInfoRepository.findByYear(2005).log();
+
+        StepVerifier.create(movieInfosFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void findByName() {
+        var movieInfosMono = movieInfoRepository.findByName("The Dark Knight").log();
+
+        StepVerifier.create(movieInfosMono)
+                .expectNextCount(1)
+                .verifyComplete();
     }
 }
